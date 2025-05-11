@@ -9,9 +9,10 @@ if (!displayName) {
   socket.emit("join", displayName);
 }
 
-const messagesBox = document.getElementById("chat-box"); // Sửa lại ID
-const input = document.getElementById("message-input"); // Sửa lại ID
-const button = document.getElementById("send-btn"); // Sửa lại ID
+const messagesBox = document.getElementById("chat-box");
+const input = document.getElementById("message-input");
+const sendButton = document.getElementById("send-btn");
+const logoutButton = document.getElementById("logout-btn"); // Lấy tham chiếu đến nút đăng xuất
 
 function appendMessage(msg) {
   const div = document.createElement("div");
@@ -21,7 +22,7 @@ function appendMessage(msg) {
   messagesBox.scrollTop = messagesBox.scrollHeight;
 }
 
-button.onclick = () => {
+sendButton.onclick = () => {
   const msg = input.value;
   if (msg.trim()) {
     socket.emit("chat message", msg);
@@ -35,3 +36,10 @@ socket.on("chat message", appendMessage);
 fetch("/api/messages")
   .then(res => res.json())
   .then(data => data.forEach(appendMessage));
+
+// Xử lý đăng xuất
+logoutButton.onclick = () => {
+  localStorage.removeItem("token");       // Xóa token (nếu có)
+  localStorage.removeItem("displayName"); // Xóa displayName
+  window.location.href = "/auth.html";    // Chuyển hướng về trang đăng nhập/đăng ký
+};
