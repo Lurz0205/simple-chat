@@ -1,12 +1,15 @@
 {
-  "name": "simple-chat",
+  "name": "chat-app",
   "version": "1.0.0",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "socket.io": "^4.7.2"
+    "socket.io": "^4.7.2",
+    "mongoose": "^7.6.1",
+    "dotenv": "^16.4.5"
   }
 }
