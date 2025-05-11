@@ -77,6 +77,50 @@ async function archiveMessages(date) {
   }
 }
 
+// Định nghĩa một route để lấy tin nhắn theo ngày
+app.get("/api/messages", async (req, res) => {
+  const date = req.query.date;
+  if (!date) {
+    return res.status(400).json({ error: "Date is required" });
+  }
+
+  try {
+    const messages = await Message.find({ date }).sort({ time: 1 }); // Sắp xếp theo thời gian
+    res.json(messages);
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    res.status(500).json({ error: "Failed to fetch messages" });
+  }
+});
+
+// **NEW**: Route to get archived dates
+app.get("/api/archivedDates", async (req, res) => {
+  try {
+    const archivedDates = await ArchivedDate.find().sort({ date: -1 }); // Sort by date descending
+    res.json(archivedDates);
+  } catch (error) {
+    console.error("Error fetching archived dates:", error);
+    res.status(500).json({ error: "Failed to fetch archived dates" });
+  }
+});
+
+// **NEW**: Route to get archived messages for a specific date
+app.get("/api/archivedMessages", async (req, res) => {
+  const date = req.query.date;
+  if (!date) {
+    return res.status(400).json({ error: "Date is required" });
+  }
+
+  try {
+    const ArchivedMessageModel = mongoose.model(`ChatHistory_${date}`, messageSchema);
+    const messages = await ArchivedMessageModel.find().sort({ time: 1 });
+    res.json(messages);
+  } catch (error) {
+    console.error("Error fetching archived messages:", error);
+    res.status(500).json({ error: "Failed to fetch archived messages" });
+  }
+});
+
 io.on("connection", async (socket) => {
   console.log("A user connected");
 
