@@ -12,12 +12,12 @@ if (!displayName) {
 const messagesBox = document.getElementById("chat-box");
 const input = document.getElementById("message-input");
 const sendButton = document.getElementById("send-btn");
-const logoutButton = document.getElementById("logout-btn"); // Lấy tham chiếu đến nút đăng xuất
+const logoutButton = document.getElementById("logout-btn");
 
 function appendMessage(msg) {
   const div = document.createElement("div");
   div.classList.add("message");
-  div.innerText = `${msg.name}: ${msg.text}`;
+  div.innerText = `${msg.username}: ${msg.text}`; // ✅ Sửa lại để sử dụng msg.username
   messagesBox.appendChild(div);
   messagesBox.scrollTop = messagesBox.scrollHeight;
 }
@@ -25,12 +25,17 @@ function appendMessage(msg) {
 sendButton.onclick = () => {
   const msg = input.value;
   if (msg.trim()) {
-    socket.emit("chat message", msg);
+    socket.emit("chat message", {  // ✅ Gửi một object chứa username và text
+      username: displayName,
+      text: msg,
+    });
     input.value = "";
   }
 };
 
-socket.on("chat message", appendMessage);
+socket.on("chat message", (data) => {  // ✅ Lắng nghe sự kiện "chat message"
+  appendMessage(data);
+});
 
 // 🆕 Tải lịch sử tin nhắn
 fetch("/api/messages")
@@ -39,7 +44,7 @@ fetch("/api/messages")
 
 // Xử lý đăng xuất
 logoutButton.onclick = () => {
-  localStorage.removeItem("token");       // Xóa token (nếu có)
-  localStorage.removeItem("displayName"); // Xóa displayName
-  window.location.href = "/auth.html";    // Chuyển hướng về trang đăng nhập/đăng ký
+  localStorage.removeItem("token");
+  localStorage.removeItem("displayName");
+  window.location.href = "/auth.html";
 };
