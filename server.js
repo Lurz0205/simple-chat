@@ -92,17 +92,21 @@ app.post('/api/login', async (req, res) => {
     res.status(500).json({ message: "Login failed" });
   }
 });
+const Message = mongoose.model("Message", messageSchema);
 
-// Gửi lịch sử khi người dùng kết nối
 io.on("connection", async (socket) => {
-  const messages = await Message.find().sort({ _id: 1 }).limit(100);
-  socket.emit("loadMessages", messages);
+    const messages = await Message.find().sort({ _id: 1 }).limit(100);
+    socket.emit("loadMessages", messages);  // ✅ SỬA ĐÂY: Sửa lại tên sự kiện (chữ "L" viết thường)
 
-  socket.on("chatMessage", async (data) => {
-    const newMsg = new Message(data);
-    await newMsg.save();
-    io.emit("chatMessage", data);
-  });
+    socket.on("chatMessage", async (data) => {
+        const newMsg = new Message({ // ✅ SỬA ĐÂY: Tạo đối tượng Message đúng cách
+            username: data.username,
+            text: data.text,
+            time: new Date().toLocaleTimeString()
+        });
+        await newMsg.save();
+        io.emit("chatMessage", data);
+    });
 });
 
 const PORT = process.env.PORT || 3000;
