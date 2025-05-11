@@ -1,210 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login / Register</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f1f1f1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 100px;
-        }
+    <title>Chat Application</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script> <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
 
-        form {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* Để căn giữa các phần tử trong form */
-        }
+      #chat-container {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        width: 95%;
+        max-width: 800px;
+        height: 90vh;
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+        margin-bottom: 10px;
+        position: relative;
+      }
 
-        input, button, .language-button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước phần tử */
-        }
+      #chat-header {
+        text-align: center;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        font-size: 1.4rem;
+        color: #333;
+        display: flex;
+        align-items: center;
+      }
 
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
+      #chat-header h2 {
+        margin: 0 auto;
+        text-align: center;
+        flex: none;
+        width: fit-content;
+      }
 
-        button:hover {
-            background-color: #0056b3;
-        }
+      #messages-box {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        height: calc(100% - 120px);
+      }
 
-        .error {
-            color: red;
-            font-size: 0.9em;
-            margin-bottom: 10px;
-            text-align: center;
-        }
+      .message {
+        background-color: #e0e0e0;
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 8px;
+        max-width: 80%;
+        word-wrap: break-word;
+        font-size: 0.95rem;
+        color: #222;
+        animation: fadeIn 0.2s ease-in-out;
+      }
 
-        .language-button {
-            background-color: #e0e0e0;
-            color: #333;
-            border: none;
-            cursor: pointer;
-            margin-top: 15px; /* Thêm khoảng cách với nút đăng ký/đăng nhập */
-            align-self: center; /* Căn giữa nút chuyển đổi ngôn ngữ */
-            width: auto; /* Điều chỉnh độ rộng vừa đủ nội dung */
-            padding: 8px 16px; /* Điều chỉnh padding cho đẹp */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
         }
+        to {
+          opacity: 1;
+        }
+      }
 
-        .language-button:hover {
-            background-color: #ccc;
-        }
+      .message.sender {
+        background-color: #b0f0b0;
+        align-self: flex-end;
+      }
 
-        #authForm {
-            width: 300px;
-        }
+      #input-container {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-top: 1px solid #ddd;
+      }
+
+      #message-input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-right: 10px;
+        font-size: 0.95rem;
+      }
+
+      #message-input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      }
+
+      #send-btn {
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-size: 0.95rem;
+      }
+
+      #send-btn:hover {
+        background-color: #0056b3;
+      }
+
+      #send-btn i {
+        font-size: 1.4rem;
+      }
+
+      #logout-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(to bottom, #4CAF50, #388E3C);
+        color: white;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        font-weight: 600;
+        text-shadow: 1px 1px 0px #388E3C;
+        margin-right: 0;
+      }
+
+      #logout-btn:hover {
+        background: linear-gradient(to bottom, #66BB6A, #43A047);
+        box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+        transform: scale(1.05);
+      }
+
+      #logout-btn:active {
+        background: linear-gradient(to bottom, #4CAF50, #388E3C);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        transform: scale(0.95);
+      }
     </style>
-</head>
-<body>
-    <form id="authForm">
-        <h2 id="formTitle">Login</h2>
-        <input type="text" id="displayName" placeholder="Display Name" style="display:none" />
-        <input type="text" id="username" placeholder="Username" />
-        <input type="password" id="password" placeholder="Password" />
-        <button id="submitBtn">Login</button>
-        <p id="toggleMode">Don't have an account? Register</p>
-        <p id="errorMsg" class="error"></p>
-        <button id="languageToggle" class="language-button">Tiếng Việt</button> </form>
-
+  </head>
+  <body>
+    <div id="chat-container">
+      <div id="chat-header">
+        <h2>GENERAL CHAT</h2>
+        <button id="logout-btn">Logout</button>
+      </div>
+      <div id="messages-box"></div>
+      <div id="input-container">
+        <input type="text" id="message-input" placeholder="Type your message..." />
+        <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
     <script>
-        const authForm = document.getElementById("authForm");
-        const displayNameInput = document.getElementById("displayName");
-        const usernameInput = document.getElementById("username");
-        const passwordInput = document.getElementById("password");
-        const errorMsg = document.getElementById("errorMsg");
-        const toggleLink = document.getElementById("toggleMode");
-        const formTitle = document.getElementById("formTitle");
-        const submitBtn = document.getElementById("submitBtn");
-        const languageToggle = document.getElementById("languageToggle"); // Lấy nút chuyển đổi ngôn ngữ
+      const socket = io();
+      const displayName = localStorage.getItem("displayName");
+      if (!displayName) {
+        window.location.href = "/auth.html";
+      } else {
+        socket.emit("join", displayName);
+      }
 
-        let isLoginMode = true;
-        let isVietnamese = false; // Biến trạng thái ngôn ngữ
+      const messagesBox = document.getElementById("messages-box");
+      const input = document.getElementById("message-input");
+      const sendButton = document.getElementById("send-btn");
+      const logoutButton = document.getElementById("logout-btn");
 
-        // Đối tượng chứa các thông báo
-        const messages = {
-            en: {
-                login: "Login",
-                register: "Register",
-                displayName: "Display Name",
-                username: "Username",
-                password: "Password",
-                loginButton: "Login",
-                registerButton: "Register",
-                noAccount: "Don't have an account? Register",
-                haveAccount: "Already have an account? Login",
-                fillFields: "Please fill in all required fields.",
-                userExists: "Username already exists.",
-                registerSuccess: "Registration successful! Please log in.",
-                loginFailed: "Login failed.",
-                wrongPassword: "Incorrect password.",
-                usernameNotFound: "Username not found.",
-                networkError: "Network error. Please try again.",
-            },
-            vi: {
-                login: "Đăng nhập",
-                register: "Đăng ký",
-                displayName: "Tên hiển thị",
-                username: "Tên đăng nhập",
-                password: "Mật khẩu",
-                loginButton: "Đăng nhập",
-                registerButton: "Đăng ký",
-                noAccount: "Chưa có tài khoản? Đăng ký ngay",
-                haveAccount: "Đã có tài khoản? Đăng nhập",
-                fillFields: "Vui lòng điền đầy đủ thông tin.",
-                userExists: "Tên người dùng đã tồn tại.",
-                registerSuccess: "Đăng ký thành công! Vui lòng đăng nhập.",
-                loginFailed: "Đăng nhập không thành công.",
-                wrongPassword: "Mật khẩu không đúng.",
-                usernameNotFound: "Không tìm thấy tên người dùng.",
-                networkError: "Lỗi mạng. Vui lòng thử lại.",
-            },
-        };
-
-        // Hàm để cập nhật giao diện ngôn ngữ
-        function updateLanguage() {
-            const lang = isVietnamese ? "vi" : "en";
-            formTitle.textContent = isLoginMode ? messages[lang].login : messages[lang].register;
-            displayNameInput.placeholder = messages[lang].displayName;
-            usernameInput.placeholder = messages[lang].username;
-            passwordInput.placeholder = messages[lang].password;
-            submitBtn.textContent = isLoginMode ? messages[lang].loginButton : messages[lang].registerButton;
-            toggleLink.textContent = isLoginMode ? messages[lang].noAccount : messages[lang].haveAccount;
-            languageToggle.textContent = isVietnamese ? "English" : "Tiếng Việt"; // Cập nhật nút chuyển đổi ngôn ngữ
+      function appendMessage(msg) {
+        const div = document.createElement("div");
+        div.classList.add("message");
+        if (msg.username === displayName) {
+          div.classList.add("sender");
         }
+        div.innerText = `${msg.username}: ${msg.text} (${msg.time})`;
+        messagesBox.appendChild(div);
+        messagesBox.scrollTop = messagesBox.scrollHeight;
+      }
 
-        // Sự kiện chuyển đổi ngôn ngữ
-        languageToggle.addEventListener("click", (e) => {
-            e.preventDefault();
-            isVietnamese = !isVietnamese;
-            updateLanguage();
+      sendButton.onclick = () => {
+        const msg = input.value;
+        if (msg.trim()) {
+          socket.emit("chatMessage", { username: displayName, text: msg });
+          input.value = "";
+        }
+      };
+
+      socket.on("chatMessage", (data) => {
+        appendMessage(data);
+      });
+
+      fetch(`/api/messages?date=${new Date().toISOString().split("T")[0]}`)
+        .then((res) => res.json())
+        .then((data) => {
+          data.forEach(appendMessage);
         });
 
-        // Gọi hàm cập nhật ngôn ngữ ban đầu
-        updateLanguage();
-
-        toggleLink.addEventListener("click", (e) => {
-            e.preventDefault();
-            isLoginMode = !isLoginMode;
-            updateLanguage();
-            displayNameInput.style.display = isLoginMode ? "none" : "block";
-            errorMsg.textContent = "";
-        });
-
-        authForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
-            const displayName = displayNameInput.value.trim();
-
-            if (!username || !password || (!isLoginMode && !displayName)) {
-                errorMsg.textContent = isVietnamese ? messages.vi.fillFields : messages.en.fillFields;
-                return;
-            }
-
-            const endpoint = isLoginMode ? "/api/login" : "/api/register";
-            const body = {
-                username,
-                password,
-                ...(isLoginMode ? {} : { displayName }),
-            };
-
-            try {
-                const res = await fetch(endpoint, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(body),
-                });
-
-                const result = await res.json();
-
-                if (!res.ok) {
-                    errorMsg.textContent = result.message || (isVietnamese ? messages.vi.loginFailed : messages.en.loginFailed);
-                } else {
-                    // Lưu thông tin người dùng và chuyển hướng
-                    localStorage.setItem("displayName", result.displayName);
-                    window.location.href = "/index.html"; // Chuyển hướng đến trang chat
-                }
-            } catch (error) {
-                errorMsg.textContent = isVietnamese ? messages.vi.networkError : messages.en.networkError;
-            }
-        });
+      logoutButton.onclick = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("displayName");
+        window.location.href = "/auth.html";
+      };
     </script>
-</body>
+  </body>
 </html>
