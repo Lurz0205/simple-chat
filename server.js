@@ -31,81 +31,83 @@ const messageSchema = new mongoose.Schema({
   text: String,
   time: String,
 });
-const Message = mongoose.model("Message", messageSchema);
+const Message = mongoose.model("Message", messageSchema);  // Keep this declaration
 
-// **NEW: User Schema & Model**
+// **NEW: User Schema & Model** // I'm keeping this here, assuming you need it for user authentication
 const userSchema = new mongoose.Schema({
-  username: { type: String, unique: true, required: true }, // Thêm unique: true
-  password: { type: String, required: true },
-  displayName: { type: String, required: true },
+    username: String,
+    password: String,
+    displayName: String,
 });
 const User = mongoose.model("User", userSchema);
 
-// **NEW: Register Route**
+
+// **NEW: Register Route** //  and these routes
 app.post('/api/register', async (req, res) => {
-  const { username, password, displayName } = req.body;
+    const { username, password, displayName } = req.body;
 
-  // **IMPORTANT: Add proper validation and error handling here!**
-  if (!username || !password || !displayName) {
-    return res.status(400).json({ message: "Missing fields" });
-  }
-
-  try {
-    const newUser = new User({ username, password, displayName });
-    await newUser.save();
-    res.status(201).json({ message: "User created successfully" });
-
-  } catch (error) {
-    if (error.code === 11000) { // MongoDB duplicate key error code
-      return res.status(400).json({ message: "Username already exists" });
+     if (!username || !password || !displayName) {
+        return res.status(400).json({ message: "Missing fields" });
     }
-    console.error("Registration error:", error);
-    res.status(500).json({ message: "Registration failed" });
-  }
+
+    try {
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.status(400).json({ message: "Username already exists" });
+        }
+
+        const newUser = new User({ username, password, displayName });
+        await newUser.save();
+
+        res.status(201).json({ message: "User created successfully" });
+
+    } catch (error) {
+        console.error("Registration error:", error);
+        res.status(500).json({ message: "Registration failed" });
+    }
 });
 
 // **NEW: Login Route**
 app.post('/api/login', async (req, res) => {
-  const { username, password } = req.body;
+    const { username, password } = req.body;
 
-  // **IMPORTANT: Add proper validation and error handling here!**
-  if (!username || !password) {
-    return res.status(400).json({ message: "Missing fields" });
-  }
-
-  try {
-    const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+     if (!username || !password) {
+        return res.status(400).json({ message: "Missing fields" });
     }
 
-    // **IMPORTANT: In real apps, compare HASHED passwords!  Never store plain text passwords!**
-    if (password !== user.password) {
-      return res.status(401).json({ message: "Invalid credentials" });
+    try {
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(401).json({ message: "Invalid credentials" });
+        }
+
+        if (password !== user.password) {
+            return res.status(401).json({ message: "Invalid credentials" });
+        }
+
+        res.json({ message: "Login successful", displayName: user.displayName });
+
+    } catch (error) {
+        console.error("Login error:", error);
+        res.status(500).json({ message: "Login failed" });
     }
-
-    // **For simplicity, send back user info. In real apps, you'd generate a token (JWT).**
-    res.json({ message: "Login successful", displayName: user.displayName });
-
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ message: "Login failed" });
-  }
 });
 
-io.on("connection", async (socket) => {
-    const messages = await Message.find().sort({ _id: 1 }).limit(100);
-    socket.emit("loadMessages", messages);  // ✅ SỬA ĐÂY: Sửa lại tên sự kiện (chữ "L" viết thường)
 
-    socket.on("chatMessage", async (data) => {
-        const newMsg = new Message({ // ✅ SỬA ĐÂY: Tạo đối tượng Message đúng cách
-            username: data.username,
-            text: data.text,
-            time: new Date().toLocaleTimeString()
-        });
-        await newMsg.save();
-        io.emit("chatMessage", data);
+// Gửi lịch sử khi người dùng kết nối
+io.on("connection", async (socket) => {
+  const messages = await Message.find().sort({ _id: 1 }).limit(100);
+  socket.emit("loadMessages", messages);
+
+  socket.on("chatMessage", async (data) => {
+    const newMsg = new Message({  // Corrected:  Make sure Message is constructed correctly.
+        username: data.username,
+        text: data.text,
+        time: new Date().toLocaleTimeString()
     });
+    await newMsg.save();
+    io.emit("chatMessage", data);
+  });
 });
 
 const PORT = process.env.PORT || 3000;
