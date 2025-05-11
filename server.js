@@ -1,28 +1,43 @@
-// server.js
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import path from "path";
-import { fileURLToPath } from "url";
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
 // Cấu hình đường dẫn tĩnh
-const __filename = fileURLToFilename(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  // Tăng cường độ ổn định và hiệu suất
+  cors: {
+    origin: "*",  // Cho phép tất cả các nguồn (trong môi trường production, hãy cấu hình cụ thể)
+    methods: ["GET", "POST"]
+  },
+  transports: ['websocket', 'polling'], // Ưu tiên Websocket
+  maxHttpBufferSize: 1e8,  // 100MB, tăng kích thước buffer nếu cần thiết
+  pingTimeout: 60000,    // Tăng timeout để tránh ngắt kết nối không cần thiết
+  pingInterval: 25000,
+});
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 
 // Kết nối MongoDB
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI, {
+    // Các tùy chọn để tối ưu hóa kết nối
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000, // Tăng timeout để kết nối ổn định hơn
+    socketTimeoutMS: 30000,         // Tăng timeout cho socket
+  })
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB error:", err));
 
@@ -51,38 +66,38 @@ const User = mongoose.model("User", userSchema);
 
 // **NEW**: Hàm để lưu trữ tin nhắn theo ngày
 async function archiveMessages(date) {
-  try {
-    // Kiểm tra xem ngày đã được lưu trữ chưa
-    const alreadyArchived = await ArchivedDate.findOne({ date });
-    if (alreadyArchived) {
-      console.log(`Messages for ${date} already archived.`);
-      return; // Không làm gì nếu đã lưu trữ
+    try {
+        // Kiểm tra xem ngày đã được lưu trữ chưa
+        const alreadyArchived = await ArchivedDate.findOne({ date });
+        if (alreadyArchived) {
+            console.log(`Messages for ${date} already archived.`);
+            return; // Không làm gì nếu đã lưu trữ
+        }
+
+        // Lấy tất cả tin nhắn trong ngày
+        const messagesToArchive = await Message.find({ date });
+
+        if (messagesToArchive.length > 0) {
+            // Tạo model mới cho ngày đã lưu trữ (ví dụ: ChatHistory_20240728)
+            const ArchivedMessageModel = mongoose.model(`ChatHistory_${date}`, messageSchema);
+
+            // Chuyển tin nhắn sang model mới
+            await ArchivedMessageModel.insertMany(messagesToArchive);
+
+            // Xóa tin nhắn gốc
+            await Message.deleteMany({ date });
+
+            // Lưu ngày đã lưu trữ
+            const newArchivedDate = new ArchivedDate({ date });
+            await newArchivedDate.save();
+
+            console.log(`Archived ${messagesToArchive.length} messages for ${date}.`);
+        } else {
+            console.log(`No messages to archive for ${date}.`);
+        }
+    } catch (error) {
+        console.error("Error archiving messages:", error);
     }
-
-    // Lấy tất cả tin nhắn trong ngày
-    const messagesToArchive = await Message.find({ date });
-
-    if (messagesToArchive.length > 0) {
-      // Tạo model mới cho ngày đã lưu trữ (ví dụ: ChatHistory_20240728)
-      const ArchivedMessageModel = mongoose.model(`ChatHistory_${date}`, messageSchema);
-
-      // Chuyển tin nhắn sang model mới
-      await ArchivedMessageModel.insertMany(messagesToArchive);
-
-      // Xóa tin nhắn gốc
-      await Message.deleteMany({ date });
-
-      // Lưu ngày đã lưu trữ
-      const newArchivedDate = new ArchivedDate({ date });
-      await newArchivedDate.save();
-
-      console.log(`Archived ${messagesToArchive.length} messages for ${date}.`);
-    } else {
-      console.log(`No messages to archive for ${date}.`);
-    }
-  } catch (error) {
-    console.error("Error archiving messages:", error);
-  }
 }
 
 // Định nghĩa một route để lấy tin nhắn theo ngày
@@ -183,10 +198,14 @@ io.on("connection", async (socket) => {
   console.log("A user connected");
 
   const today = new Date().toISOString().split("T")[0];
+  try{
+        // Lấy tin nhắn hôm nay
+        const messages = await Message.find({ date: today }).sort({ time: 1 }).limit(100);
+        socket.emit("loadMessages", messages);
+  }catch(e){
+        console.error("Error loading messages", e)
+  }
 
-  // Lấy tin nhắn hôm nay
-  const messages = await Message.find({ date: today }).sort({ time: 1 }).limit(100);
-  socket.emit("loadMessages", messages);
 
   socket.on("chatMessage", async (data) => {
     console.log("Received chatMessage:", data);
@@ -196,8 +215,13 @@ io.on("connection", async (socket) => {
       time: new Date().toLocaleTimeString(),
       date: today,
     });
-    await newMsg.save();
-    io.emit("chatMessage", newMsg);
+    try{
+        await newMsg.save();
+        io.emit("chatMessage", newMsg);
+    }catch(e){
+        console.error("Error saving message",e);
+    }
+
   });
 
   socket.on("disconnect", () => {
