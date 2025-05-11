@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -21,13 +20,18 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Để căn giữa các phần tử trong form */
         }
 
-        input,
-        button {
+        input, button, .language-button {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước phần tử */
         }
 
         button {
@@ -44,24 +48,163 @@
         .error {
             color: red;
             font-size: 0.9em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .language-button {
+            background-color: #e0e0e0;
+            color: #333;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px; /* Thêm khoảng cách với nút đăng ký/đăng nhập */
+            align-self: center; /* Căn giữa nút chuyển đổi ngôn ngữ */
+            width: auto; /* Điều chỉnh độ rộng vừa đủ nội dung */
+            padding: 8px 16px; /* Điều chỉnh padding cho đẹp */
+        }
+
+        .language-button:hover {
+            background-color: #ccc;
+        }
+
+        #authForm {
+            width: 300px;
         }
     </style>
 </head>
-
 <body>
     <form id="authForm">
         <h2 id="formTitle">Login</h2>
         <input type="text" id="displayName" placeholder="Display Name" style="display:none" />
-        <input type="text" id="username" placeholder="Username" required />
-        <input type="password" id="password" placeholder="Password" required />
-        <button type="submit" id="submitBtn">Login</button>
-        <p class="error" id="errorMsg"></p>
-        <p>
-            <a href="#" id="toggleMode">Don't have an account? Register</a>
-        </p>
-    </form>
+        <input type="text" id="username" placeholder="Username" />
+        <input type="password" id="password" placeholder="Password" />
+        <button id="submitBtn">Login</button>
+        <p id="toggleMode">Don't have an account? Register</p>
+        <p id="errorMsg" class="error"></p>
+        <button id="languageToggle" class="language-button">Tiếng Việt</button> </form>
 
-    <script src="/auth.js"></script>
+    <script>
+        const authForm = document.getElementById("authForm");
+        const displayNameInput = document.getElementById("displayName");
+        const usernameInput = document.getElementById("username");
+        const passwordInput = document.getElementById("password");
+        const errorMsg = document.getElementById("errorMsg");
+        const toggleLink = document.getElementById("toggleMode");
+        const formTitle = document.getElementById("formTitle");
+        const submitBtn = document.getElementById("submitBtn");
+        const languageToggle = document.getElementById("languageToggle"); // Lấy nút chuyển đổi ngôn ngữ
+
+        let isLoginMode = true;
+        let isVietnamese = false; // Biến trạng thái ngôn ngữ
+
+        // Đối tượng chứa các thông báo
+        const messages = {
+            en: {
+                login: "Login",
+                register: "Register",
+                displayName: "Display Name",
+                username: "Username",
+                password: "Password",
+                loginButton: "Login",
+                registerButton: "Register",
+                noAccount: "Don't have an account? Register",
+                haveAccount: "Already have an account? Login",
+                fillFields: "Please fill in all required fields.",
+                userExists: "Username already exists.",
+                registerSuccess: "Registration successful! Please log in.",
+                loginFailed: "Login failed.",
+                wrongPassword: "Incorrect password.",
+                usernameNotFound: "Username not found.",
+                networkError: "Network error. Please try again.",
+            },
+            vi: {
+                login: "Đăng nhập",
+                register: "Đăng ký",
+                displayName: "Tên hiển thị",
+                username: "Tên đăng nhập",
+                password: "Mật khẩu",
+                loginButton: "Đăng nhập",
+                registerButton: "Đăng ký",
+                noAccount: "Chưa có tài khoản? Đăng ký ngay",
+                haveAccount: "Đã có tài khoản? Đăng nhập",
+                fillFields: "Vui lòng điền đầy đủ thông tin.",
+                userExists: "Tên người dùng đã tồn tại.",
+                registerSuccess: "Đăng ký thành công! Vui lòng đăng nhập.",
+                loginFailed: "Đăng nhập không thành công.",
+                wrongPassword: "Mật khẩu không đúng.",
+                usernameNotFound: "Không tìm thấy tên người dùng.",
+                networkError: "Lỗi mạng. Vui lòng thử lại.",
+            },
+        };
+
+        // Hàm để cập nhật giao diện ngôn ngữ
+        function updateLanguage() {
+            const lang = isVietnamese ? "vi" : "en";
+            formTitle.textContent = isLoginMode ? messages[lang].login : messages[lang].register;
+            displayNameInput.placeholder = messages[lang].displayName;
+            usernameInput.placeholder = messages[lang].username;
+            passwordInput.placeholder = messages[lang].password;
+            submitBtn.textContent = isLoginMode ? messages[lang].loginButton : messages[lang].registerButton;
+            toggleLink.textContent = isLoginMode ? messages[lang].noAccount : messages[lang].haveAccount;
+            languageToggle.textContent = isVietnamese ? "English" : "Tiếng Việt"; // Cập nhật nút chuyển đổi ngôn ngữ
+        }
+
+        // Sự kiện chuyển đổi ngôn ngữ
+        languageToggle.addEventListener("click", (e) => {
+            e.preventDefault();
+            isVietnamese = !isVietnamese;
+            updateLanguage();
+        });
+
+        // Gọi hàm cập nhật ngôn ngữ ban đầu
+        updateLanguage();
+
+        toggleLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            isLoginMode = !isLoginMode;
+            updateLanguage();
+            displayNameInput.style.display = isLoginMode ? "none" : "block";
+            errorMsg.textContent = "";
+        });
+
+        authForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            const displayName = displayNameInput.value.trim();
+
+            if (!username || !password || (!isLoginMode && !displayName)) {
+                errorMsg.textContent = isVietnamese ? messages.vi.fillFields : messages.en.fillFields;
+                return;
+            }
+
+            const endpoint = isLoginMode ? "/api/login" : "/api/register";
+            const body = {
+                username,
+                password,
+                ...(isLoginMode ? {} : { displayName }),
+            };
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body),
+                });
+
+                const result = await res.json();
+
+                if (!res.ok) {
+                    errorMsg.textContent = result.message || (isVietnamese ? messages.vi.loginFailed : messages.en.loginFailed);
+                } else {
+                    // Lưu thông tin người dùng và chuyển hướng
+                    localStorage.setItem("displayName", result.displayName);
+                    window.location.href = "/index.html"; // Chuyển hướng đến trang chat
+                }
+            } catch (error) {
+                errorMsg.textContent = isVietnamese ? messages.vi.networkError : messages.en.networkError;
+            }
+        });
+    </script>
 </body>
-
 </html>
