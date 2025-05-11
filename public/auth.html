@@ -209,7 +209,6 @@
         });
 
       logoutButton.onclick = () => {
-        localStorage.removeItem("token");
         localStorage.removeItem("displayName");
         window.location.href = "/auth.html";
       };
