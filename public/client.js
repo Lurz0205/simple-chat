@@ -1,36 +1,34 @@
 const socket = io();
+const displayName = localStorage.getItem("displayName");
+if (!displayName) {
+  window.location.href = "login.html";
+}
 
-const loginScreen = document.getElementById("login-screen");
-const chatContainer = document.getElementById("chat-container");
-const chatBox = document.getElementById("chat-box");
-const sendBtn = document.getElementById("send-btn");
-const messageInput = document.getElementById("message-input");
-const joinBtn = document.getElementById("join-btn");
-const usernameInput = document.getElementById("username");
+socket.emit("join", displayName);
 
-let username = "";
+const messagesBox = document.getElementById("messages");
+const input = document.getElementById("message");
+const button = document.getElementById("send");
 
-joinBtn.addEventListener("click", () => {
-  username = usernameInput.value.trim();
-  if (username) {
-    loginScreen.style.display = "none";
-    chatContainer.style.display = "block";
-    socket.emit("join", username);
+function appendMessage(msg) {
+  const div = document.createElement("div");
+  div.classList.add("message");
+  div.innerText = `${msg.name}: ${msg.text}`;
+  messagesBox.appendChild(div);
+  messagesBox.scrollTop = messagesBox.scrollHeight;
+}
+
+button.onclick = () => {
+  const msg = input.value;
+  if (msg.trim()) {
+    socket.emit("chat message", msg);
+    input.value = "";
   }
-});
+};
 
-sendBtn.addEventListener("click", () => {
-  const msg = messageInput.value.trim();
-  if (msg !== "") {
-    socket.emit("chat message", { username, msg });
-    messageInput.value = "";
-  }
-});
+socket.on("chat message", appendMessage);
 
-socket.on("chat message", ({ username, msg }) => {
-  const msgDiv = document.createElement("div");
-  msgDiv.classList.add("message");
-  msgDiv.textContent = `${username}: ${msg}`;
-  chatBox.appendChild(msgDiv);
-  chatBox.scrollTop = chatBox.scrollHeight;
-});
+// 🆕 Tải lịch sử tin nhắn
+fetch("/api/messages")
+  .then(res => res.json())
+  .then(data => data.forEach(appendMessage));
