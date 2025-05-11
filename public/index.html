@@ -98,6 +98,7 @@
         border-radius: 8px;
         margin-right: 10px;
         font-size: 0.95rem;
+        flex: 1;
       }
 
       #message-input:focus {
@@ -123,6 +124,7 @@
 
       #send-btn i {
         font-size: 1.4rem;
+        /* transform: rotate(45deg); // Xoay icon 45 độ */
       }
 
       #logout-btn {
@@ -197,6 +199,13 @@
           input.value = "";
         }
       };
+
+      input.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          sendButton.onclick();
+        }
+      });
 
       socket.on("chatMessage", (data) => {
         appendMessage(data);
