@@ -10,7 +10,7 @@ import { fileURLToPath } from "url";
 dotenv.config();
 
 // Cấu hình đường dẫn tĩnh
-const __filename = fileURLToPath(import.meta.url);
+const __filename = fileURLToFilename(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
@@ -40,6 +40,14 @@ const archivedDateSchema = new mongoose.Schema({
   date: String,
 });
 const ArchivedDate = mongoose.model("ArchivedDate", archivedDateSchema);
+
+// **NEW**: Schema cho User
+const userSchema = new mongoose.Schema({
+  username: String,
+  password: String,
+  displayName: String,
+});
+const User = mongoose.model("User", userSchema);
 
 // **NEW**: Hàm để lưu trữ tin nhắn theo ngày
 async function archiveMessages(date) {
@@ -121,25 +129,75 @@ app.get("/api/archivedMessages", async (req, res) => {
   }
 });
 
+// **NEW**: Đăng ký người dùng
+app.post("/api/register", async (req, res) => {
+  const { username, password, displayName } = req.body;
+
+  if (!username || !password || !displayName) {
+    return res.status(400).json({ message: "Vui lòng điền đầy đủ thông tin." });
+  }
+
+  try {
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ message: "Tên người dùng đã tồn tại." });
+    }
+
+    const newUser = new User({ username, password, displayName });
+    await newUser.save();
+
+    res.status(201).json({ message: "Người dùng đã được tạo thành công." });
+  } catch (error) {
+    console.error("Lỗi đăng ký:", error);
+    res.status(500).json({ message: "Đăng ký không thành công." });
+  }
+});
+
+// **NEW**: Đăng nhập người dùng
+app.post("/api/login", async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ message: "Vui lòng điền đầy đủ thông tin." });
+  }
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(401).json({ message: "Tên người dùng không tồn tại." });
+    }
+
+    if (password !== user.password) {
+      return res.status(401).json({ message: "Mật khẩu không đúng." });
+    }
+
+    // **IMPORTANT**:  In a real application, you should use a more secure method like JWT
+    res.json({ message: "Đăng nhập thành công.", displayName: user.displayName });
+  } catch (error) {
+    console.error("Lỗi đăng nhập:", error);
+    res.status(500).json({ message: "Đăng nhập không thành công." });
+  }
+});
+
 io.on("connection", async (socket) => {
   console.log("A user connected");
 
   const today = new Date().toISOString().split("T")[0];
 
   // Lấy tin nhắn hôm nay
-  const messages = await Message.find({ date: today }).sort({ _id: 1 }).limit(100);
+  const messages = await Message.find({ date: today }).sort({ time: 1 }).limit(100);
   socket.emit("loadMessages", messages);
 
   socket.on("chatMessage", async (data) => {
-    console.log("Received chatMessage:", data); // Debug
+    console.log("Received chatMessage:", data);
     const newMsg = new Message({
       username: data.username,
       text: data.text,
       time: new Date().toLocaleTimeString(),
-      date: today, // Lưu ngày vào tin nhắn
+      date: today,
     });
     await newMsg.save();
-    io.emit("chatMessage", newMsg); // Phát lại toàn bộ đối tượng newMsg
+    io.emit("chatMessage", newMsg);
   });
 
   socket.on("disconnect", () => {
@@ -170,3 +228,4 @@ runDailyArchive();
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
