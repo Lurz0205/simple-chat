@@ -38,7 +38,8 @@ socket.on("chatMessage", (data) => {
 });
 
 // Load today's messages
-fetch(`/api/messages?date=${new Date().toISOString().split("T")[0]}`)
+const today = new Date().toISOString().split("T")[0];
+fetch(`/api/messages?date=${today}`)
   .then((res) => res.json())
   .then((data) => {
     data.forEach(appendMessage);
