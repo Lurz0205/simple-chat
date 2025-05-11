@@ -92,7 +92,6 @@ app.post('/api/login', async (req, res) => {
     res.status(500).json({ message: "Login failed" });
   }
 });
-const Message = mongoose.model("Message", messageSchema);
 
 io.on("connection", async (socket) => {
     const messages = await Message.find().sort({ _id: 1 }).limit(100);
