@@ -20,17 +20,24 @@
 
 /* CSS mới để làm nút nhẹ nhàng hơn */
 #logout-btn, #history-btn {
-  background-color: transparent; /* Loại bỏ màu nền */
-  color: #333; /* Chuyển sang màu chữ tối hơn */
-  border: 1px solid #ddd; /* Thêm viền mỏng */
+  background-color: transparent; /* Loại bỏ màu nền gốc */
+  color: #555; /* Màu chữ tối hơn, nhẹ hơn */
+  border: 1px solid #ddd; /* Viền mỏng, màu xám nhạt */
   box-shadow: none; /* Loại bỏ đổ bóng */
-  font-weight: normal; /* Chữ không đậm */
-  transition: all 0.3s ease; /* Thêm hiệu ứng chuyển đổi */
+  font-weight: 400; /* Độ đậm chữ bình thường */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* Thêm transition cho màu nền, chữ và viền */
 }
 
 #logout-btn:hover, #history-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05); /* Màu nền nhạt khi hover */
-  color: #222; /* Màu chữ đậm hơn khi hover */
-  border-color: #ccc; /* Viền đậm hơn khi hover */
+  background-color: rgba(0, 0, 0, 0.05); /* Màu nền rất nhạt khi hover */
+  color: #333; /* Màu chữ đậm hơn một chút khi hover */
+  border-color: #ccc; /* Viền đậm hơn một chút khi hover */
+}
+
+/* CSS cho trạng thái active (khi nút được nhấn) */
+#logout-btn:active, #history-btn:active {
+  background-color: rgba(0, 0, 0, 0.1); /* Màu nền đậm hơn một chút khi active */
+  color: #222; /* Màu chữ đậm hơn khi active */
+  border-color: #bbb; /* Viền đậm hơn khi active */
 }
 </style>
