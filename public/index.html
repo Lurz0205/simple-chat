@@ -110,7 +110,7 @@
       }
 
       #send-btn {
-        padding: 10px;
+        padding: 0;
         border: none;
         border-radius: 8px;
         background-color: #007bff;
@@ -118,6 +118,11 @@
         cursor: pointer;
         transition: background-color 0.3s ease;
         font-size: 0.95rem;
+        width: 40px; /* Đặt kích thước nút cố định */
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       #send-btn:hover {
@@ -132,25 +137,25 @@
         padding: 10px 20px;
         border: none;
         border-radius: 10px;
-        background: linear-gradient(to bottom, #4CAF50, #388E3C);
-        color: white;
+        background-color: #e3e3e3;
+        color: #333;
         cursor: pointer;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         transition: all 0.3s ease;
         font-size: 1rem;
         font-weight: 600;
-        text-shadow: 1px 1px 0px #388E3C;
+        text-shadow: 1px 1px 0px #b0b0b0;
         margin-right: 0;
       }
 
       #logout-btn:hover {
-        background: linear-gradient(to bottom, #66BB6A, #43A047);
+        background-color: #d0d0d0;
         box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
         transform: scale(1.05);
       }
 
       #logout-btn:active {
-        background: linear-gradient(to bottom, #4CAF50, #388E3C);
+        background-color: #c0c0c0;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         transform: scale(0.95);
       }
@@ -203,25 +208,25 @@
         padding: 10px 20px;
         border: none;
         border-radius: 10px;
-        background-color: #007bff;
-        color: white;
+        background-color: #e3e3e3;
+        color: #333;
         cursor: pointer;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         transition: all 0.3s ease;
         font-size: 1rem;
         font-weight: 600;
-        text-shadow: 1px 1px 0px #0056b3;
+        text-shadow: 1px 1px 0px #b0b0b0;
         margin-right: 10px;
       }
 
       #history-btn:hover {
-        background-color: #0080ff;
+        background-color: #d0d0d0;
         box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
         transform: scale(1.05);
       }
 
       #history-btn:active {
-        background-color: #004080;
+        background-color: #c0c0c0;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         transform: scale(0.95);
       }
@@ -246,6 +251,27 @@
       .green { background-color: #c1e1c1; }
       .purple { background-color: #e0b0ff; }
       .orange { background-color: #ffe599; }
+
+      .password-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      #password-input {
+        flex: 1;
+        padding-right: 30px; /* Để dành chỗ cho icon */
+      }
+
+      .password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 1.1rem;
+        color: #888;
+      }
     </style>
   </head>
   <body>
@@ -266,7 +292,9 @@
       <div id="messages-box"></div>
       <div id="input-container">
         <input type="text" id="message-input" placeholder="Type your message..." />
-        <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
+        <button id="send-btn">
+            <i class="fas fa-paper-plane"></i>
+        </button>
       </div>
       <div id="history-menu" class="history-menu">
         <ul></ul>
@@ -394,6 +422,24 @@
           message.style.backgroundColor = savedColor;
         });
       }
+
+      // Thêm hiển thị mật khẩu
+      const passwordInput = document.getElementById('password-input');
+      const passwordToggle = document.createElement('i');
+      passwordToggle.classList.add('fas', 'fa-eye', 'password-toggle');
+      passwordInput.parentElement.appendChild(passwordToggle);
+
+      passwordToggle.addEventListener('click', () => {
+        if (passwordInput.type === 'password') {
+          passwordInput.type = 'text';
+          passwordToggle.classList.remove('fa-eye');
+          passwordToggle.classList.add('fa-eye-slash');
+        } else {
+          passwordInput.type = 'password';
+          passwordToggle.classList.remove('fa-eye-slash');
+          passwordToggle.classList.add('fa-eye');
+        }
+      });
     </script>
   </body>
 </html>
