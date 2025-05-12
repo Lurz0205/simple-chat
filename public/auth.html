@@ -154,7 +154,7 @@
                 userExists: "Username already exists.",
                 registerSuccess: "Registration successful! Please log in.",
                 loginFailed: "Login failed.",
-                wrongPassword: "Incorrect password.",
+                wrongPassword: "Incorrect password. Password must be at least 8 characters.",
                 usernameNotFound: "Username not found.",
                 networkError: "Network error. Please try again.",
             },
@@ -172,7 +172,7 @@
                 userExists: "Tên người dùng đã tồn tại.",
                 registerSuccess: "Đăng ký thành công! Vui lòng đăng nhập.",
                 loginFailed: "Đăng nhập không thành công.",
-                wrongPassword: "Mật khẩu không đúng.",
+                wrongPassword: "Mật khẩu không đúng. Mật khẩu phải có ít nhất 8 ký tự.",
                 usernameNotFound: "Không tìm thấy tên người dùng.",
                 networkError: "Lỗi mạng. Vui lòng thử lại.",
             },
@@ -216,6 +216,11 @@
                 return;
             }
 
+             if (password.length < 8) {
+                errorMsg.textContent = isVietnamese ? messages.vi.wrongPassword : messages.en.wrongPassword;
+                return;
+            }
+
             const endpoint = isLoginMode ? "/api/login" : "/api/register";
             const body = {
                 username,
@@ -235,32 +240,8 @@
                 if (!res.ok) {
                     errorMsg.textContent = result.message || (isVietnamese ? messages.vi.loginFailed : messages.en.loginFailed);
                 } else {
-                    // Kiểm tra phản hồi của máy chủ
-                    console.log("Server response:", result);
-
-                    if (isLoginMode) {
-                         // Đăng nhập thành công
-                        if (result.displayName) {
-                            localStorage.setItem("displayName", result.displayName);
-                        }
-                        else{
-                            localStorage.setItem("displayName", result.username);
-                        }
-                        window.location.href = "/index.html";
-                    } 
-                    else 
-                    {
-                        // Đăng ký thành công
-                        if (result.displayName) {
-                             localStorage.setItem("displayName", result.displayName);
-                        }
-                        else{
-                            localStorage.setItem("displayName", result.username);
-                        }
-                       
-                        window.location.href = "/index.html";
-                    }
-                   
+                    localStorage.setItem("displayName", result.displayName);
+                    window.location.href = "/index.html";
                 }
             } catch (error) {
                 errorMsg.textContent = isVietnamese ? messages.vi.networkError : messages.en.networkError;
