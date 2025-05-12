@@ -6,7 +6,8 @@
     <title>Chat Application</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
-    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script> <style>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
       body {
         font-family: 'Inter', sans-serif;
         background-color: #f5f5f5;
@@ -40,6 +41,7 @@
         color: #333;
         display: flex;
         align-items: center;
+        justify-content: space-between; /* Đẩy các phần tử ra hai đầu */
       }
 
       #chat-header h2 {
@@ -124,7 +126,6 @@
 
       #send-btn i {
         font-size: 1.4rem;
-        /* transform: rotate(45deg); // Xoay icon 45 độ */
       }
 
       #logout-btn {
@@ -153,18 +154,122 @@
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         transform: scale(0.95);
       }
+
+      .history-menu {
+        position: absolute;
+        top: 50px;
+        left: 10px;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        display: none;
+        max-height: 200px;
+        overflow-y: auto;
+        width: 200px;
+      }
+
+      .history-menu.show {
+        display: block;
+      }
+
+      .history-menu ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .history-menu li {
+        padding: 8px 12px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-size: 0.95rem;
+        color: #333;
+      }
+
+      .history-menu li:last-child {
+        border-bottom: none;
+      }
+
+      .history-menu li:hover {
+        background-color: #f0f0f0;
+        color: #222;
+      }
+
+      #history-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 10px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        font-weight: 600;
+        text-shadow: 1px 1px 0px #0056b3;
+        margin-right: 10px;
+      }
+
+      #history-btn:hover {
+        background-color: #0080ff;
+        box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+        transform: scale(1.05);
+      }
+
+      #history-btn:active {
+        background-color: #004080;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        transform: scale(0.95);
+      }
+
+      .theme-colors {
+        display: flex;
+        gap: 10px;
+        margin-left: 10px;
+      }
+      .theme-color-button {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: border-color 0.3s ease;
+      }
+      .theme-color-button:hover {
+        border-color: #333;
+      }
+      .blue { background-color: #007bff; }
+      .green { background-color: #28a745; }
+      .purple { background-color: #800080; }
+      .orange { background-color: #ff8c00; }
     </style>
   </head>
   <body>
     <div id="chat-container">
       <div id="chat-header">
+        <div style="display: flex; align-items: center;">
+          <button id="history-btn">History</button>
+          <button id="logout-btn">Logout</button>
+        </div>
         <h2>GENERAL CHAT</h2>
-        <button id="logout-btn">Logout</button>
+        <div class="theme-colors">
+          <div class="theme-color-button blue" data-color="#007bff"></div>
+          <div class="theme-color-button green" data-color="#28a745"></div>
+          <div class="theme-color-button purple" data-color="#800080"></div>
+          <div class="theme-color-button orange" data-color="#ff8c00"></div>
+        </div>
       </div>
       <div id="messages-box"></div>
       <div id="input-container">
         <input type="text" id="message-input" placeholder="Type your message..." />
         <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
+      </div>
+      <div id="history-menu" class="history-menu">
+        <ul></ul>
       </div>
     </div>
     <script>
@@ -180,6 +285,10 @@
       const input = document.getElementById("message-input");
       const sendButton = document.getElementById("send-btn");
       const logoutButton = document.getElementById("logout-btn");
+      const historyBtn = document.getElementById("history-btn");
+      const historyMenu = document.getElementById("history-menu");
+      const historyMenuList = historyMenu.querySelector("ul");
+      let chatHistory = {};
 
       function appendMessage(msg) {
         const div = document.createElement("div");
@@ -209,18 +318,67 @@
 
       socket.on("chatMessage", (data) => {
         appendMessage(data);
+        const today = new Date().toISOString().split("T")[0];
+        if (!chatHistory[today]) {
+          chatHistory[today] = [];
+        }
+        chatHistory[today].push(data);
+        localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
       });
 
-      fetch(`/api/messages?date=${new Date().toISOString().split("T")[0]}`)
-        .then((res) => res.json())
-        .then((data) => {
-          data.forEach(appendMessage);
+      function loadChatHistory(date) {
+        messagesBox.innerHTML = "";
+        const history = JSON.parse(localStorage.getItem("chatHistory")) || {};
+        const messages = history[date] || [];
+        messages.forEach(appendMessage);
+      }
+
+      historyBtn.onclick = () => {
+        historyMenu.classList.toggle("show");
+        historyMenuList.innerHTML = "";
+        const history = JSON.parse(localStorage.getItem("chatHistory")) || {};
+        Object.keys(history).forEach((date) => {
+          const li = document.createElement("li");
+          li.innerText = date;
+          li.onclick = () => {
+            loadChatHistory(date);
+            historyMenu.classList.remove("show");
+          };
+          historyMenuList.appendChild(li);
         });
+      };
+
+      document.addEventListener("click", (e) => {
+        if (!historyMenu.contains(e.target) && e.target !== historyBtn) {
+          historyMenu.classList.remove("show");
+        }
+      });
+
+      const savedHistory = localStorage.getItem("chatHistory");
+      if (savedHistory) {
+        chatHistory = JSON.parse(savedHistory);
+      }
+
+      const today = new Date().toISOString().split("T")[0];
+      loadChatHistory(today);
 
       logoutButton.onclick = () => {
         localStorage.removeItem("displayName");
         window.location.href = "/auth.html";
       };
+
+      document.querySelectorAll('.theme-color-button').forEach(button => {
+        button.addEventListener('click', function() {
+          const color = this.getAttribute('data-color');
+          document.documentElement.style.setProperty('--primary-color', color);
+          localStorage.setItem('themeColor', color);
+        });
+      });
+
+      const savedColor = localStorage.getItem('themeColor');
+      if (savedColor) {
+        document.documentElement.style.setProperty('--primary-color', savedColor);
+      }
     </script>
   </body>
 </html>
