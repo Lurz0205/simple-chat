@@ -8,19 +8,19 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: #f0f4f8; /* Màu nền nhạt hơn */
+            background: #f0f4f8;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-top: 120px; /* Tăng khoảng cách từ đỉnh */
+            padding-top: 120px;
         }
 
         form {
             background: white;
-            padding: 30px; /* Tăng padding */
-            border-radius: 12px; /* Bo tròn nhiều hơn */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Bóng đổ tinh tế hơn */
-            width: 350px; /* Rộng hơn một chút */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 350px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -28,59 +28,59 @@
 
         input, button, .language-button {
             width: 100%;
-            padding: 12px; /* Tăng padding */
+            padding: 12px;
             margin: 10px 0;
-            border-radius: 6px; /* Bo tròn nhẹ */
-            border: 1px solid #e0e0e0; /* Viền nhạt hơn */
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
             box-sizing: border-box;
-            transition: all 0.3s ease; /* Thêm hiệu ứng chuyển đổi */
-            font-size: 1rem; /* Tăng kích thước chữ */
+            transition: all 0.3s ease;
+            font-size: 1rem;
         }
 
         input:focus {
             outline: none;
-            border-color: #4CAF50; /* Màu viền khi focus */
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1); /* Bóng đổ khi focus */
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
         }
 
         button {
-            background-color: #4CAF50; /* Màu xanh lá cây nhẹ */
+            background-color: #4CAF50;
             color: white;
             border: none;
             cursor: pointer;
-            font-weight: 600; /* Chữ đậm hơn */
+            font-weight: 600;
         }
 
         button:hover {
-            background-color: #45a049; /* Màu đậm hơn khi hover */
-            transform: translateY(-1px); /* Nhẹ lên khi hover */
+            background-color: #45a049;
+            transform: translateY(-1px);
         }
 
         button:active {
-            background-color: #388E3C; /* Màu đậm hơn khi active */
+            background-color: #388E3C;
             transform: translateY(0);
         }
 
         .error {
-            color: #e53935; /* Màu đỏ nhạt */
+            color: #e53935;
             font-size: 0.9em;
             margin-bottom: 10px;
             text-align: center;
         }
 
         .language-button {
-            background-color: transparent; /* Trong suốt */
-            color: #757575; /* Màu xám trung tính */
+            background-color: transparent;
+            color: #757575;
             border: none;
             cursor: pointer;
-            margin-top: 20px; /* Tăng khoảng cách */
+            margin-top: 20px;
             align-self: center;
             padding: 10px;
             transition: color 0.3s ease;
         }
 
         .language-button:hover {
-            color: #212121; /* Màu đen đậm hơn khi hover */
+            color: #212121;
         }
 
         .language-button:active {
@@ -93,8 +93,8 @@
         }
 
         h2 {
-            color: #2c3e50; /* Màu tiêu đề đậm */
-            margin-bottom: 25px; /* Tăng khoảng cách */
+            color: #2c3e50;
+            margin-bottom: 25px;
             text-align: center;
             font-weight: 600;
             font-size: 1.8rem;
@@ -236,6 +236,10 @@
                     errorMsg.textContent = result.message || (isVietnamese ? messages.vi.loginFailed : messages.en.loginFailed);
                 } else {
                     localStorage.setItem("displayName", result.displayName);
+                    // Kiểm tra xem có giá trị displayName không
+                    if (result.displayName) {
+                        localStorage.setItem("displayName", result.displayName);
+                    }
                     window.location.href = "/index.html";
                 }
             } catch (error) {
