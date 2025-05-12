@@ -242,10 +242,10 @@
       .theme-color-button:hover {
         border-color: #333;
       }
-      .blue { background-color: #b0e0e6; } /* Pastel Blue */
-      .green { background-color: #c1e1c1; } /* Pastel Green */
-      .purple { background-color: #e0b0ff; } /* Pastel Purple */
-      .orange { background-color: #ffe599; } /* Pastel Orange */
+      .blue { background-color: #b0e0e6; }
+      .green { background-color: #c1e1c1; }
+      .purple { background-color: #e0b0ff; }
+      .orange { background-color: #ffe599; }
     </style>
   </head>
   <body>
@@ -372,11 +372,14 @@
           const color = this.getAttribute('data-color');
           document.documentElement.style.setProperty('--primary-color', color);
           localStorage.setItem('themeColor', color);
+          // Apply the color to the root element
+          document.documentElement.style.setProperty('--theme-color', color);
         });
       });
 
       const savedColor = localStorage.getItem('themeColor');
       if (savedColor) {
+        document.documentElement.style.setProperty('--theme-color', savedColor);
         document.documentElement.style.setProperty('--primary-color', savedColor);
       }
     </script>
