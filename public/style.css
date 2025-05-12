@@ -1,66 +1,36 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background-color: #f0f2f5;
-  display: flex;
-  height: 100vh;
-  justify-content: center;
-  align-items: center;
-}
-
-.login-screen, .chat-container {
-  width: 400px;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-header {
-  font-size: 24px;
-  text-align: center;
-  margin-bottom: 10px;
-  color: #333;
-}
-
-.chat-box {
-  height: 300px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  padding: 10px;
-  background-color: #fafafa;
-  margin-bottom: 10px;
-}
-
-.message {
-  margin: 5px 0;
-}
-
-.input-area {
-  display: flex;
-}
-
-#message-input {
-  flex: 1;
-  padding: 10px;
-  font-size: 14px;
-}
-
-#send-btn {
-  padding: 10px;
-  background-color: #4a90e2;
+<style>
+/* CSS gốc của nút */
+#logout-btn, #history-btn {
+  padding: 10px 20px;
+  border-radius: 5px;
   color: white;
   border: none;
   cursor: pointer;
-  font-weight: bold;
+  font-size: 16px;
+  margin-left: 10px; /* Thêm khoảng cách giữa hai nút */
 }
 
-#send-btn:hover {
-  background-color: #357abd;
+#logout-btn {
+  background-color: #f44336; /* Màu đỏ */
 }
 
-input[type="text"] {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
+#history-btn {
+  background-color: #2196f3; /* Màu xanh dương */
 }
+
+/* CSS mới để làm nút nhẹ nhàng hơn */
+#logout-btn, #history-btn {
+  background-color: transparent; /* Loại bỏ màu nền */
+  color: #333; /* Chuyển sang màu chữ tối hơn */
+  border: 1px solid #ddd; /* Thêm viền mỏng */
+  box-shadow: none; /* Loại bỏ đổ bóng */
+  font-weight: normal; /* Chữ không đậm */
+  transition: all 0.3s ease; /* Thêm hiệu ứng chuyển đổi */
+}
+
+#logout-btn:hover, #history-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05); /* Màu nền nhạt khi hover */
+  color: #222; /* Màu chữ đậm hơn khi hover */
+  border-color: #ccc; /* Viền đậm hơn khi hover */
+}
+</style>
