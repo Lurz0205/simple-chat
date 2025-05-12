@@ -235,12 +235,32 @@
                 if (!res.ok) {
                     errorMsg.textContent = result.message || (isVietnamese ? messages.vi.loginFailed : messages.en.loginFailed);
                 } else {
-                    localStorage.setItem("displayName", result.displayName);
-                    // Kiểm tra xem có giá trị displayName không
-                    if (result.displayName) {
-                        localStorage.setItem("displayName", result.displayName);
+                    // Kiểm tra phản hồi của máy chủ
+                    console.log("Server response:", result);
+
+                    if (isLoginMode) {
+                         // Đăng nhập thành công
+                        if (result.displayName) {
+                            localStorage.setItem("displayName", result.displayName);
+                        }
+                        else{
+                            localStorage.setItem("displayName", result.username);
+                        }
+                        window.location.href = "/index.html";
+                    } 
+                    else 
+                    {
+                        // Đăng ký thành công
+                        if (result.displayName) {
+                             localStorage.setItem("displayName", result.displayName);
+                        }
+                        else{
+                            localStorage.setItem("displayName", result.username);
+                        }
+                       
+                        window.location.href = "/index.html";
                     }
-                    window.location.href = "/index.html";
+                   
                 }
             } catch (error) {
                 errorMsg.textContent = isVietnamese ? messages.vi.networkError : messages.en.networkError;
