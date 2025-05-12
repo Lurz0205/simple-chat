@@ -374,6 +374,13 @@
           localStorage.setItem('themeColor', color);
           // Apply the color to the root element
           document.documentElement.style.setProperty('--theme-color', color);
+          // Change send button color
+          sendButton.style.backgroundColor = color;
+          // Change sender message color
+          const senderMessages = document.querySelectorAll('.message.sender');
+          senderMessages.forEach(message => {
+            message.style.backgroundColor = color;
+          });
         });
       });
 
@@ -381,6 +388,11 @@
       if (savedColor) {
         document.documentElement.style.setProperty('--theme-color', savedColor);
         document.documentElement.style.setProperty('--primary-color', savedColor);
+        sendButton.style.backgroundColor = savedColor;
+        const senderMessages = document.querySelectorAll('.message.sender');
+        senderMessages.forEach(message => {
+          message.style.backgroundColor = savedColor;
+        });
       }
     </script>
   </body>
